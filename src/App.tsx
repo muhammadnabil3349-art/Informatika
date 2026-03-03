@@ -53,8 +53,12 @@ export default function App() {
     setIsLoading(true);
     try {
       const [invRes, histRes] = await Promise.all([fetch('/api/inventory'), fetch('/api/history')]);
+      if (!invRes.ok || !histRes.ok) throw new Error('Gagal narik data dari server bray!');
       setInventory(await invRes.json());
       setHistory(await histRes.json());
+    } catch (e: any) {
+      console.error(e);
+      alert('Error: ' + e.message);
     } finally { setIsLoading(false); }
   }, []);
 
@@ -397,18 +401,6 @@ export default function App() {
           >
             <Package2 size={20} />
             Download DB
-          </button>
-          <button 
-            onClick={async () => {
-              const res = await fetch('/api/debug-db');
-              const data = await res.json();
-              console.log('DB Debug Info:', data);
-              alert('Cek Console (F12) buat liat data mentah database bray!');
-            }}
-            className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-all"
-            title="Debug DB"
-          >
-            <Plus className="rotate-45" size={20} />
           </button>
           <button onClick={fetchData} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-full transition-all"><RotateCcw size={20} /></button>
         </div>
