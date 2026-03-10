@@ -10,16 +10,13 @@ import { Server } from "socket.io";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Inisialisasi Database
 const db = new Database("inventory.db");
 
-// Bikin tabel kalau belum ada
 db.exec(`
   CREATE TABLE IF NOT EXISTS inventory (
     name TEXT PRIMARY KEY,
     quantity INTEGER NOT NULL
   );
-
   CREATE TABLE IF NOT EXISTS transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     type TEXT NOT NULL,
@@ -30,7 +27,6 @@ db.exec(`
   );
 `);
 
-// Pastikan kolom proof_image ada
 try {
   const tableInfo = db.prepare("PRAGMA table_info(transactions)").all() as any[];
   if (!tableInfo.some(col => col.name === 'proof_image')) {
@@ -38,7 +34,6 @@ try {
   }
 } catch (e) {}
 
-// Isi stok awal kalau kosong
 const rowCount = db.prepare("SELECT COUNT(*) as count FROM inventory").get() as { count: number };
 if (rowCount.count === 0) {
   const insert = db.prepare("INSERT INTO inventory (name, quantity) VALUES (?, ?)");
@@ -51,7 +46,7 @@ async function startServer() {
   const app = express();
   const httpServer = createServer(app);
   const io = new Server(httpServer);
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
   app.use(express.json({ limit: '50mb' }));
 
